@@ -22,6 +22,7 @@
             justify-content: center;
             padding: 20px;
             color: #333;
+            overflow-x: hidden;
         }
         
         .container {
@@ -50,7 +51,7 @@
         .letter-container {
             position: relative;
             width: 100%;
-            height: 500px;
+            min-height: 500px;
             margin: 0 auto 40px;
             perspective: 1000px;
         }
@@ -126,6 +127,28 @@
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.8s ease 0.8s;
+            max-height: 100%;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        /* Scrollbar styling */
+        .letter-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .letter-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .letter-content::-webkit-scrollbar-thumb {
+            background: #bdc3c7;
+            border-radius: 3px;
+        }
+        
+        .letter-content::-webkit-scrollbar-thumb:hover {
+            background: #95a5a6;
         }
         
         .letter-content h2 {
@@ -161,6 +184,7 @@
         .letter.open {
             display: block;
             animation: letterAppear 1s ease 0.5s forwards;
+            overflow: visible;
         }
         
         .letter-content.show {
@@ -170,17 +194,23 @@
         
         @keyframes letterAppear {
             0% {
+                width: 280px;
                 height: 180px;
                 top: 50%;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             }
             50% {
+                width: 280px;
                 height: 180px;
                 top: 50%;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             }
             100% {
-                height: 450px;
+                width: 90%;
+                max-width: 700px;
+                height: auto;
+                min-height: 450px;
+                max-height: 70vh;
                 top: 0;
                 box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             }
@@ -229,6 +259,13 @@
             box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
         }
         
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 10px rgba(189, 195, 199, 0.3);
+        }
+        
         .instructions {
             background: rgba(255, 255, 255, 0.8);
             padding: 20px;
@@ -268,9 +305,9 @@
         }
         
         /* Responsive design */
-        @media (max-width: 650px) {
+        @media (max-width: 768px) {
             .letter-container {
-                height: 400px;
+                min-height: 400px;
             }
             
             .envelope, .envelope-flap {
@@ -285,7 +322,9 @@
             
             @keyframes letterAppear {
                 100% {
-                    height: 380px;
+                    width: 90%;
+                    min-height: 380px;
+                    max-height: 60vh;
                     top: 0;
                 }
             }
@@ -308,12 +347,21 @@
             button {
                 width: 200px;
             }
+            
+            @keyframes letterAppear {
+                100% {
+                    width: 95%;
+                    min-height: 350px;
+                    max-height: 55vh;
+                    top: 0;
+                }
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-envelope-open-text"></i>Letter</h1>
+        <h1><i class="fas fa-envelope-open-text"></i> Secret Letter</h1>
         <p class="subtitle">Click the envelope or use the button below to open the letter and reveal its heartfelt contents. A beautiful animation will bring this personal message to life.</p>
         
         <div class="letter-container">
@@ -327,8 +375,13 @@
                     <p>I hope this letter finds you in good health and high spirits. It feels like an eternity since we last spoke, though I know it has only been a few months. So much has happened since then, and I find myself thinking of our conversations and wishing we could have one right now.</p>
                     <p>The autumn leaves have started to fall here, painting the streets in hues of gold and crimson. It reminds me of that fall we spent together at the lake house, drinking hot cocoa by the fireplace and talking until the early hours of the morning.</p>
                     <p>I've recently taken up painting, something I always said I would do but never found the time for. It's both challenging and rewarding, and it makes me wonder what hidden talents you might be nurturing these days.</p>
-                    <p>Please write back when you have a moment. I would love to hear about your life, your dreams, and everything in between.</p>
-                    <p class="closing">With warmest affection,<br><strong>Alex</strong></p>
+                    <p>Remember when we promised each other we'd travel the world together? I've been saving up and researching destinations. Italy is at the top of my list - the art, the food, the history. I can already picture us getting lost in the narrow streets of Venice or sitting at a café in Rome, watching the world go by.</p>
+                    <p>Work has been demanding lately, but I try to remind myself of what truly matters. Your advice about work-life balance has stayed with me, and I've started taking weekends completely off to recharge. It's made such a difference in my creativity and overall happiness.</p>
+                    <p>Last week, I found an old photo album from our college days. We looked so young and full of dreams! Some of those dreams have changed, others we've achieved, and many are still works in progress. It made me realize how grateful I am to have shared so much of this journey with you.</p>
+                    <p>Please write back when you have a moment. I would love to hear about your life, your dreams, and everything in between. Tell me about the book you're reading, the music that's been stuck in your head, the small joys of your everyday life.</p>
+                    <p>I've enclosed a pressed flower from my garden - the last rose of summer. It's fragile but still beautiful, much like certain memories that we preserve in our hearts.</p>
+                    <p class="closing">With warmest affection and the hope of reunion soon,<br><strong>Alex</strong></p>
+                    <p class="closing">P.S. I'll be visiting your city in December. Let's plan to meet if you're around!</p>
                 </div>
             </div>
         </div>
@@ -346,8 +399,9 @@
             <h3><i class="fas fa-lightbulb"></i> How to use</h3>
             <p>1. Click the red envelope or the "Open Letter" button to watch the envelope open and reveal the letter</p>
             <p>2. The letter will expand to show its full contents with a smooth animation</p>
-            <p>3. Use the "Close Letter" button to reset the animation and close the envelope</p>
-            <p>4. The animation is fully responsive and works on all devices</p>
+            <p>3. <strong>Scroll inside the letter</strong> if the content is too long to fit on screen</p>
+            <p>4. Use the "Close Letter" button to reset the animation and close the envelope</p>
+            <p>5. The animation is fully responsive and works on all devices</p>
         </div>
     </div>
 
@@ -373,6 +427,9 @@
                 // Show letter content after letter animation
                 setTimeout(() => {
                     letterContent.classList.add('show');
+                    
+                    // Scroll to top of letter content
+                    letterContent.scrollTop = 0;
                 }, 800);
             }, 500);
             
@@ -423,6 +480,11 @@
                 }, 3000);
                 firstLoad = false;
             }
+        });
+        
+        // Prevent letter click from closing the letter
+        letter.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     </script>
 </body>

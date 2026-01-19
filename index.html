@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Letter</title>
+    <title>Animated Letter Modal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -48,27 +48,30 @@
             line-height: 1.5;
         }
         
-        .letter-container {
+        .envelope-container {
             position: relative;
             width: 100%;
-            min-height: 500px;
-            margin: 0 auto 40px;
-            perspective: 1000px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
         }
         
         .envelope {
-            position: absolute;
+            position: relative;
             width: 300px;
             height: 200px;
             background: #e74c3c;
             border-radius: 5px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.5s ease;
             cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .envelope:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
         }
         
         .envelope:before, .envelope:after {
@@ -101,12 +104,15 @@
             top: 0;
             left: 0;
             transform-origin: top;
-            transform: rotateX(0deg);
-            transition: transform 1s ease;
-            z-index: 3;
+            transition: transform 0.8s ease;
+            z-index: 2;
         }
         
-        .letter {
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        .letter-inside {
             position: absolute;
             width: 280px;
             height: 180px;
@@ -115,155 +121,189 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1;
-            padding: 20px;
-            text-align: left;
             border-radius: 3px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .envelope.open .letter-inside {
+            opacity: 1;
+        }
+        
+        .stamp {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            background: #f1c40f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c0392b;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            transform: rotate(15deg);
+            z-index: 3;
+            border: 2px dashed #c0392b;
+        }
+        
+        .click-hint {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.95rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            height: 85vh;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             overflow: hidden;
+            transform: scale(0.8);
+            transition: transform 0.5s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .close-modal:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
+        }
+        
+        .letter-modal {
+            width: 100%;
+            height: 100%;
+            padding: 50px 40px 30px;
+            overflow-y: auto;
+            background: #fff9f0;
+            background-image: 
+                linear-gradient(to bottom, rgba(255,249,240,0.8), rgba(255,249,240,0.8)),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e6d3b9' fill-opacity='0.3' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        .letter-modal::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .letter-modal::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .letter-modal::-webkit-scrollbar-thumb {
+            background: #c9b8a4;
+            border-radius: 4px;
+        }
+        
+        .letter-modal::-webkit-scrollbar-thumb:hover {
+            background: #b8a48c;
         }
         
         .letter-content {
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+            font-size: 1.1rem;
+            color: #333;
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease 0.8s;
-            max-height: 100%;
-            overflow-y: auto;
-            padding-right: 5px;
+            transform: translateY(30px);
+            transition: all 0.8s ease 0.5s;
         }
         
-        /* Scrollbar styling */
-        .letter-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .letter-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-        
-        .letter-content::-webkit-scrollbar-thumb {
-            background: #bdc3c7;
-            border-radius: 3px;
-        }
-        
-        .letter-content::-webkit-scrollbar-thumb:hover {
-            background: #95a5a6;
-        }
-        
-        .letter-content h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        
-        .letter-content p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-            font-size: 1.05rem;
-        }
-        
-        .letter-content .closing {
-            margin-top: 20px;
-            text-align: right;
-            font-style: italic;
-        }
-        
-        /* Animation classes */
-        .envelope.open {
-            transform: translate(-50%, -50%) translateY(-100px);
-            z-index: 1;
-        }
-        
-        .envelope-flap.open {
-            transform: rotateX(180deg);
-        }
-        
-        .letter.open {
-            display: block;
-            animation: letterAppear 1s ease 0.5s forwards;
-            overflow: visible;
-        }
-        
-        .letter-content.show {
+        .modal-overlay.active .letter-content {
             opacity: 1;
             transform: translateY(0);
         }
         
-        @keyframes letterAppear {
-            0% {
-                width: 280px;
-                height: 180px;
-                top: 50%;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            }
-            50% {
-                width: 280px;
-                height: 180px;
-                top: 50%;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            }
-            100% {
-                width: 90%;
-                max-width: 700px;
-                height: auto;
-                min-height: 450px;
-                max-height: 70vh;
-                top: 0;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            }
+        .letter-content h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e6d3b9;
         }
         
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
+        .letter-content p {
+            margin-bottom: 20px;
+            text-align: justify;
         }
         
-        button {
-            padding: 12px 25px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        .letter-content .closing {
+            margin-top: 40px;
+            text-align: right;
+            font-style: italic;
+            font-size: 1.2rem;
         }
         
-        button:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button#closeBtn {
-            background: #95a5a6;
-            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
-        }
-        
-        button#closeBtn:hover {
-            background: #7f8c8d;
-            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
-        }
-        
-        button:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 4px 10px rgba(189, 195, 199, 0.3);
+        .letter-content .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-top: 10px;
+            display: block;
+            text-align: right;
         }
         
         .instructions {
@@ -284,207 +324,188 @@
             font-size: 1.2rem;
         }
         
-        .stamp {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 70px;
-            height: 70px;
-            background: #f1c40f;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #c0392b;
-            font-weight: bold;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            transform: rotate(15deg);
-            z-index: 4;
-            border: 2px dashed #c0392b;
-        }
-        
         /* Responsive design */
         @media (max-width: 768px) {
-            .letter-container {
-                min-height: 400px;
-            }
-            
-            .envelope, .envelope-flap {
+            .envelope {
                 width: 250px;
                 height: 160px;
             }
             
-            .letter {
+            .envelope-flap {
+                width: 250px;
+                height: 160px;
+            }
+            
+            .letter-inside {
                 width: 230px;
                 height: 140px;
             }
             
-            @keyframes letterAppear {
-                100% {
-                    width: 90%;
-                    min-height: 380px;
-                    max-height: 60vh;
-                    top: 0;
-                }
+            .modal-content {
+                height: 90vh;
+                padding: 40px 20px 20px;
+            }
+            
+            .letter-modal {
+                padding: 40px 25px 25px;
+            }
+            
+            .letter-content h2 {
+                font-size: 1.8rem;
+            }
+            
+            .letter-content {
+                font-size: 1rem;
             }
             
             h1 {
                 font-size: 2rem;
             }
-            
-            .letter-content h2 {
-                font-size: 1.5rem;
-            }
         }
         
         @media (max-width: 480px) {
-            .controls {
-                flex-direction: column;
-                align-items: center;
+            .modal-content {
+                width: 95%;
+                height: 95vh;
             }
             
-            button {
-                width: 200px;
+            .letter-modal {
+                padding: 40px 20px 20px;
             }
             
-            @keyframes letterAppear {
-                100% {
-                    width: 95%;
-                    min-height: 350px;
-                    max-height: 55vh;
-                    top: 0;
-                }
+            .letter-content h2 {
+                font-size: 1.6rem;
+            }
+            
+            .click-hint {
+                font-size: 0.85rem;
             }
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h1><i class="fas fa-envelope-open-text"></i> Secret Letter</h1>
-        <p class="subtitle">Click the envelope or use the button below to open the letter and reveal its heartfelt contents. A beautiful animation will bring this personal message to life.</p>
+        <p class="subtitle">Click the envelope to open it and reveal the letter inside. The letter will animate into a full-screen modal that you can close at any time.</p>
         
-        <div class="letter-container">
-            <div class="stamp">Post<br>Sealed</div>
+        <div class="envelope-container">
             <div class="envelope" id="envelope">
-                <div class="envelope-flap" id="envelopeFlap"></div>
+                <div class="envelope-flap"></div>
+                <div class="letter-inside"></div>
+                <div class="stamp">Post<br>Sealed</div>
             </div>
-            <div class="letter" id="letter">
-                <div class="letter-content" id="letterContent">
-                    <h2>My Dearest Friend,</h2>
-                    <p>I hope this letter finds you in good health and high spirits. It feels like an eternity since we last spoke, though I know it has only been a few months. So much has happened since then, and I find myself thinking of our conversations and wishing we could have one right now.</p>
-                    <p>The autumn leaves have started to fall here, painting the streets in hues of gold and crimson. It reminds me of that fall we spent together at the lake house, drinking hot cocoa by the fireplace and talking until the early hours of the morning.</p>
-                    <p>I've recently taken up painting, something I always said I would do but never found the time for. It's both challenging and rewarding, and it makes me wonder what hidden talents you might be nurturing these days.</p>
-                    <p>Remember when we promised each other we'd travel the world together? I've been saving up and researching destinations. Italy is at the top of my list - the art, the food, the history. I can already picture us getting lost in the narrow streets of Venice or sitting at a café in Rome, watching the world go by.</p>
-                    <p>Work has been demanding lately, but I try to remind myself of what truly matters. Your advice about work-life balance has stayed with me, and I've started taking weekends completely off to recharge. It's made such a difference in my creativity and overall happiness.</p>
-                    <p>Last week, I found an old photo album from our college days. We looked so young and full of dreams! Some of those dreams have changed, others we've achieved, and many are still works in progress. It made me realize how grateful I am to have shared so much of this journey with you.</p>
-                    <p>Please write back when you have a moment. I would love to hear about your life, your dreams, and everything in between. Tell me about the book you're reading, the music that's been stuck in your head, the small joys of your everyday life.</p>
-                    <p>I've enclosed a pressed flower from my garden - the last rose of summer. It's fragile but still beautiful, much like certain memories that we preserve in our hearts.</p>
-                    <p class="closing">With warmest affection and the hope of reunion soon,<br><strong>Alex</strong></p>
-                    <p class="closing">P.S. I'll be visiting your city in December. Let's plan to meet if you're around!</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="controls">
-            <button id="openBtn">
-                <i class="fas fa-envelope-open"></i> Open Letter
-            </button>
-            <button id="closeBtn">
-                <i class="fas fa-envelope"></i> Close Letter
-            </button>
+            <div class="click-hint">Click the envelope to open the letter</div>
         </div>
         
         <div class="instructions">
-            <h3><i class="fas fa-lightbulb"></i> How to use</h3>
-            <p>1. Click the red envelope or the "Open Letter" button to watch the envelope open and reveal the letter</p>
-            <p>2. The letter will expand to show its full contents with a smooth animation</p>
-            <p>3. <strong>Scroll inside the letter</strong> if the content is too long to fit on screen</p>
-            <p>4. Use the "Close Letter" button to reset the animation and close the envelope</p>
-            <p>5. The animation is fully responsive and works on all devices</p>
+            <h3><i class="fas fa-lightbulb"></i> How it works</h3>
+            <p>1. Click the red envelope to trigger the animation and open the modal</p>
+            <p>2. Watch the envelope open and the letter expand to fill most of the screen</p>
+            <p>3. Read the letter content in the beautifully styled modal</p>
+            <p>4. Click the <strong>red 'X' button</strong> in the top-right corner to close the modal and return</p>
+            <p>5. The animation is non-blocking - you can interact with other elements while it's open</p>
+        </div>
+    </div>
+    
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="close-modal" id="closeModal">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="letter-modal">
+                <div class="letter-content" id="letterContent">
+                    <h2>My Dearest Friend,</h2>
+                    <p>I hope this letter finds you in good health and high spirits. It feels like an eternity since we last spoke, though I know it has only been a few months. So much has happened since then, and I find myself thinking of our conversations and wishing we could have one right now.</p>
+                    <p>The autumn leaves have started to fall here, painting the streets in hues of gold and crimson. It reminds me of that fall we spent together at the lake house, drinking hot cocoa by the fireplace and talking until the early hours of the morning. I can still remember the sound of the rain against the windowpanes and the warmth of the fire on our faces.</p>
+                    <p>I've recently taken up painting, something I always said I would do but never found the time for. It's both challenging and rewarding, and it makes me wonder what hidden talents you might be nurturing these days. The first thing I painted was a landscape from memory of our hike through the mountains last year. The colors didn't quite capture the majesty of the real view, but it brought me back to that moment when we reached the summit and felt on top of the world.</p>
+                    <p>Remember when we promised each other we'd travel the world together? I've been saving up and researching destinations. Italy is at the top of my list - the art, the food, the history. I can already picture us getting lost in the narrow streets of Venice or sitting at a café in Rome, watching the world go by. I've even started learning a few phrases in Italian, though I'm afraid my pronunciation would make any native speaker cringe.</p>
+                    <p>Work has been demanding lately, but I try to remind myself of what truly matters. Your advice about work-life balance has stayed with me, and I've started taking weekends completely off to recharge. It's made such a difference in my creativity and overall happiness. Last Sunday, I spent the entire day reading in the park, something I haven't done since we were in college. It was blissful.</p>
+                    <p>Last week, I found an old photo album from our college days. We looked so young and full of dreams! Some of those dreams have changed, others we've achieved, and many are still works in progress. It made me realize how grateful I am to have shared so much of this journey with you. Through the triumphs and the challenges, your friendship has been a constant source of strength.</p>
+                    <p>Please write back when you have a moment. I would love to hear about your life, your dreams, and everything in between. Tell me about the book you're reading, the music that's been stuck in your head, the small joys of your everyday life. No detail is too small—I want to hear it all.</p>
+                    <p>I've enclosed a pressed flower from my garden - the last rose of summer. It's fragile but still beautiful, much like certain memories that we preserve in our hearts.</p>
+                    <p class="closing">With warmest affection and the hope of reunion soon,</p>
+                    <span class="signature">Alex</span>
+                    <p class="closing" style="margin-top: 30px;">P.S. I'll be visiting your city in December. Let's plan to meet if you're around! I've already marked the dates on my calendar.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // Get DOM elements
         const envelope = document.getElementById('envelope');
-        const envelopeFlap = document.getElementById('envelopeFlap');
-        const letter = document.getElementById('letter');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeModal = document.getElementById('closeModal');
         const letterContent = document.getElementById('letterContent');
-        const openBtn = document.getElementById('openBtn');
-        const closeBtn = document.getElementById('closeBtn');
         
-        // Open the letter
-        function openLetter() {
-            // Add open classes for animation
+        // Open modal function
+        function openModal() {
+            // Open the envelope
             envelope.classList.add('open');
-            envelopeFlap.classList.add('open');
             
-            // Show letter after a short delay
+            // Show modal after a short delay to allow envelope animation
             setTimeout(() => {
-                letter.classList.add('open');
+                modalOverlay.classList.add('active');
                 
-                // Show letter content after letter animation
+                // Reset letter content animation
+                letterContent.style.opacity = '0';
+                letterContent.style.transform = 'translateY(30px)';
+                
+                // Trigger reflow to restart animation
+                void letterContent.offsetWidth;
+                
+                // Show letter content with delay
                 setTimeout(() => {
-                    letterContent.classList.add('show');
-                    
-                    // Scroll to top of letter content
-                    letterContent.scrollTop = 0;
-                }, 800);
-            }, 500);
-            
-            // Disable open button, enable close button
-            openBtn.disabled = true;
-            closeBtn.disabled = false;
+                    letterContent.style.opacity = '1';
+                    letterContent.style.transform = 'translateY(0)';
+                }, 50);
+                
+            }, 800);
         }
         
-        // Close the letter
-        function closeLetter() {
-            // Hide letter content first
-            letterContent.classList.remove('show');
+        // Close modal function
+        function closeModalFunc() {
+            // Hide modal
+            modalOverlay.classList.remove('active');
             
-            // Then hide the letter
+            // Close envelope after a short delay
             setTimeout(() => {
-                letter.classList.remove('open');
-                
-                // Close envelope after letter hides
-                setTimeout(() => {
-                    envelope.classList.remove('open');
-                    envelopeFlap.classList.remove('open');
-                }, 300);
+                envelope.classList.remove('open');
             }, 300);
-            
-            // Enable open button, disable close button
-            openBtn.disabled = false;
-            closeBtn.disabled = true;
         }
         
         // Event listeners
-        envelope.addEventListener('click', openLetter);
-        openBtn.addEventListener('click', openLetter);
-        closeBtn.addEventListener('click', closeLetter);
+        envelope.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeModalFunc);
         
-        // Initialize with close button disabled
-        closeBtn.disabled = true;
-        
-        // Add some extra interactivity - open letter automatically after 3 seconds on first load
-        let firstLoad = true;
-        
-        window.addEventListener('load', () => {
-            if (firstLoad) {
-                setTimeout(() => {
-                    // Only auto-open if the letter is still closed
-                    if (!envelope.classList.contains('open')) {
-                        openLetter();
-                    }
-                }, 3000);
-                firstLoad = false;
+        // Close modal when clicking outside the content
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModalFunc();
             }
         });
         
-        // Prevent letter click from closing the letter
-        letter.addEventListener('click', (e) => {
-            e.stopPropagation();
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModalFunc();
+            }
+        });
+        
+        // Auto-open modal after 5 seconds on first load (optional)
+        let firstLoad = true;
+        window.addEventListener('load', () => {
+            if (firstLoad) {
+                setTimeout(() => {
+                    // Only auto-open if modal is not already open
+                    if (!modalOverlay.classList.contains('active')) {
+                        openModal();
+                    }
+                }, 5000);
+                firstLoad = false;
+            }
         });
     </script>
 </body>

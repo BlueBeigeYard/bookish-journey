@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Letter Modal</title>
+    <title>Pink Envelope Letter</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -39,7 +39,7 @@
         }
         
         .subtitle {
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             color: #7f8c8d;
             font-size: 1.1rem;
             max-width: 600px;
@@ -55,100 +55,118 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
+        /* CSS-based Envelope */
         .envelope {
             position: relative;
-            width: 300px;
-            height: 200px;
-            background: #e74c3c;
-            border-radius: 5px;
+            width: 320px;
+            height: 220px;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
         }
         
         .envelope:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
         }
         
-        .envelope:before, .envelope:after {
+        /* Envelope body (rectangle base) */
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            bottom: 0;
+            background: #ff7eb9;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 25px rgba(255, 126, 185, 0.3);
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        /* Side folds (triangles on sides) */
+        .envelope-body::before,
+        .envelope-body::after {
             content: '';
             position: absolute;
-            background: #c0392b;
-            width: 50%;
-            height: 100%;
-            border-radius: 5px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            top: 0;
+            z-index: 1;
         }
         
-        .envelope:before {
+        .envelope-body::before {
             left: 0;
-            transform: skewY(40deg);
-            transform-origin: 0 100%;
+            border-width: 0 0 154px 160px;
+            border-color: transparent transparent transparent #ff5ca3;
         }
         
-        .envelope:after {
+        .envelope-body::after {
             right: 0;
-            transform: skewY(-40deg);
-            transform-origin: 100% 100%;
+            border-width: 0 160px 154px 0;
+            border-color: transparent #ff5ca3 transparent transparent;
         }
         
+        /* Top flap (triangle) */
         .envelope-flap {
             position: absolute;
-            width: 300px;
-            height: 200px;
-            background: #d62c1a;
-            border-radius: 5px;
+            width: 0;
+            height: 0;
             top: 0;
             left: 0;
+            border-style: solid;
+            border-width: 110px 160px 0 160px;
+            border-color: #ff4d9e transparent transparent transparent;
             transform-origin: top;
             transition: transform 0.8s ease;
-            z-index: 2;
+            z-index: 3;
         }
         
         .envelope.open .envelope-flap {
             transform: rotateX(180deg);
         }
         
+        /* Letter inside (sandwiched between body and flap) */
         .letter-inside {
             position: absolute;
             width: 280px;
-            height: 180px;
+            height: 160px;
             background: #fff;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 1;
-            border-radius: 3px;
+            border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+            transition: all 0.8s ease 0.3s;
             opacity: 0;
-            transition: opacity 0.3s ease;
         }
         
         .envelope.open .letter-inside {
             opacity: 1;
+            transform: translate(-50%, -120%);
         }
         
+        /* Stamp */
         .stamp {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 70px;
-            height: 70px;
-            background: #f1c40f;
+            top: 30px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: #ffd166;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #c0392b;
+            color: #ff4d9e;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             transform: rotate(15deg);
-            z-index: 3;
-            border: 2px dashed #c0392b;
+            z-index: 4;
+            border: 2px dashed #ff4d9e;
         }
         
         .click-hint {
@@ -213,7 +231,7 @@
             right: 20px;
             width: 40px;
             height: 40px;
-            background: #e74c3c;
+            background: #ff7eb9;
             color: white;
             border-radius: 50%;
             display: flex;
@@ -227,7 +245,7 @@
         }
         
         .close-modal:hover {
-            background: #c0392b;
+            background: #ff4d9e;
             transform: rotate(90deg);
         }
         
@@ -306,38 +324,56 @@
             text-align: right;
         }
         
-        .instructions {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            max-width: 600px;
-            font-size: 0.95rem;
-            color: #555;
-            line-height: 1.5;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        /* Envelope details */
+        .envelope-detail {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
         }
         
-        .instructions h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+        .envelope-detail::before {
+            content: '';
+            position: absolute;
+            width: 90%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.4);
+            top: 50%;
+            left: 5%;
+        }
+        
+        .envelope-detail::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 70%;
+            background: rgba(255, 255, 255, 0.4);
+            top: 15%;
+            left: 50%;
         }
         
         /* Responsive design */
         @media (max-width: 768px) {
             .envelope {
-                width: 250px;
-                height: 160px;
+                width: 280px;
+                height: 190px;
+            }
+            
+            .envelope-body::before {
+                border-width: 0 0 133px 140px;
+            }
+            
+            .envelope-body::after {
+                border-width: 0 140px 133px 0;
             }
             
             .envelope-flap {
-                width: 250px;
-                height: 160px;
+                border-width: 95px 140px 0 140px;
             }
             
             .letter-inside {
-                width: 230px;
+                width: 240px;
                 height: 140px;
             }
             
@@ -364,6 +400,28 @@
         }
         
         @media (max-width: 480px) {
+            .envelope {
+                width: 240px;
+                height: 165px;
+            }
+            
+            .envelope-body::before {
+                border-width: 0 0 115px 120px;
+            }
+            
+            .envelope-body::after {
+                border-width: 0 120px 115px 0;
+            }
+            
+            .envelope-flap {
+                border-width: 80px 120px 0 120px;
+            }
+            
+            .letter-inside {
+                width: 210px;
+                height: 120px;
+            }
+            
             .modal-content {
                 width: 95%;
                 height: 95vh;
@@ -386,25 +444,19 @@
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-envelope-open-text"></i> Secret Letter</h1>
-        <p class="subtitle">Click the envelope to open it and reveal the letter inside. The letter will animate into a full-screen modal that you can close at any time.</p>
+        <h1><i class="fas fa-heart" style="color:#ff7eb9;"></i> Pink Envelope</h1>
+        <p class="subtitle">Click the pink envelope to open it and reveal the letter inside. Watch the letter slide up as the flap opens!</p>
         
         <div class="envelope-container">
             <div class="envelope" id="envelope">
+                <div class="envelope-body">
+                    <div class="envelope-detail"></div>
+                </div>
                 <div class="envelope-flap"></div>
                 <div class="letter-inside"></div>
                 <div class="stamp">Post<br>Sealed</div>
             </div>
             <div class="click-hint">Click the envelope to open the letter</div>
-        </div>
-        
-        <div class="instructions">
-            <h3><i class="fas fa-lightbulb"></i> How it works</h3>
-            <p>1. Click the red envelope to trigger the animation and open the modal</p>
-            <p>2. Watch the envelope open and the letter expand to fill most of the screen</p>
-            <p>3. Read the letter content in the beautifully styled modal</p>
-            <p>4. Click the <strong>red 'X' button</strong> in the top-right corner to close the modal and return</p>
-            <p>5. The animation is non-blocking - you can interact with other elements while it's open</p>
         </div>
     </div>
     
@@ -462,7 +514,7 @@
                     letterContent.style.transform = 'translateY(0)';
                 }, 50);
                 
-            }, 800);
+            }, 1000); // Increased delay to see letter slide up
         }
         
         // Close modal function

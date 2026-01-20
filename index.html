@@ -83,8 +83,30 @@
             z-index: 1;
             overflow: hidden;
         }
+
+        .side-triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            top: 0;
+            z-index: 1; /* Same layer as envelope-body */
+        }
+
+        .side-triangle.left {
+            left: 0;
+            border-style: solid;
+            border-width: 0 0 154px 160px; /* Adjust if you changed envelope size */
+            border-color: transparent transparent transparent #ff3366; /* Darker pink */
+        }
+
+        .side-triangle.right {
+            right: 0;
+            border-style: solid;
+            border-width: 0 160px 154px 0; /* Adjust if you changed envelope size */
+            border-color: transparent #ff3366 transparent transparent; /* Same dark pink */
+        }
         
-        /* Side folds (triangles on sides) */
+        /* /* Side folds (triangles on sides)
         .envelope-body::before,
         .envelope-body::after {
             content: '';
@@ -106,7 +128,7 @@
             right: 0;
             border-width: 0 160px 187px 0;
             border-color: transparent #ff5ca3 transparent transparent;
-        }
+        } */
         
         /* Top flap (triangle) */
         .envelope-flap {
@@ -452,6 +474,10 @@
                 <div class="envelope-body">
 
                 </div>
+
+                <div class="side-triangle left"></div>
+                <div class="side-triangle right"></div>
+                
                 <div class="envelope-flap"></div>
                 <div class="letter-inside"></div>
                 <div class="stamp">Love<br>ya!!</div>
